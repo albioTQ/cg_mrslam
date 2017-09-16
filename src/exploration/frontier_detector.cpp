@@ -260,6 +260,73 @@ void FrontierDetector::computeFrontierRegions(){
 
 	Vector2iVector examined;
 
+	Vector2iVector availablePoints = _frontiers;
+
+	for (unsigned i = 0; i < availablePoints.size(); i ++){
+
+		Vector2i currentFrontierPoint = availablePoints[i];
+
+		std::stack<Vector2i> pointsStack;
+
+		Vector2iVector tempRegion;
+
+		tempRegion.push_back(currentFrontierPoint);
+		pointsStack.push(currentFrontierPoint);
+
+		while (!pointsStack.empty()) {
+
+			Vector2i pt = pointsStack.top();
+			pointsStack.pop();
+
+			Vector2iVector neighbors;
+	    	neighbors.push_back({pt[0] + 1, pt[1]});
+	    	neighbors.push_back({pt[0] - 1, pt[1]});
+	    	neighbors.push_back({pt[0], pt[1] + 1});
+	    	neighbors.push_back({pt[0], pt[1] - 1});
+	    	neighbors.push_back({pt[0] + 1, pt[1] + 1});
+	    	neighbors.push_back({pt[0] + 1, pt[1] - 1});
+	    	neighbors.push_back({pt[0] - 1, pt[1] + 1});
+	    	neighbors.push_back({pt[0] - 1, pt[1] - 1});
+
+	    	for (unsigned j = 0; j < neighbors.size(); j++){
+
+	    		Vector2iVector::iterator it = std::find(availablePoints.begin(), availablePoints.end(), neighbors[j]);
+
+	    		if (it != availablePoints.end()){
+	    			availablePoints.erase(it);
+	    			pointsStack.push(neighbors[j]);
+	    			tempRegion.push_back(neighbors[j]);
+	    		}
+
+	    	}
+
+
+		}
+
+		if (tempRegion.size() > _sizeThreshold){
+			_regions.push_back(tempRegion);
+
+
+		   for (int l = 0; l < tempRegion.size(); l ++){
+		   		Vector2iVector neighbors = getColoredNeighbors(tempRegion[l], _unknownColor);
+		   		for (int m = 0; m < neighbors.size(); m++){
+		   				float x = neighbors[m][1]*_mapMetaData.resolution + _mapMetaData.origin.position.x;
+		   				float y = neighbors[m][0]*_mapMetaData.resolution + _mapMetaData.origin.position.y;
+		   				if (!contains(_unknownCellsCloud, Vector2f{x,y})){
+		   					_unknownCellsCloud.push_back({x,y});	}
+		   									
+		   									}
+		   								}
+
+			
+		}
+
+
+	}
+
+
+
+/*
     for (int i = 0; i < _frontiers.size(); i++){
 
     	if (!contains(examined, _frontiers[i])){ //I proceed only if the current coord has not been already considered
@@ -309,7 +376,7 @@ void FrontierDetector::computeFrontierRegions(){
     			}
 
 
-
+*/
 
 }
 	

@@ -4,8 +4,11 @@
 
 <remap from="scan" to="base_scan"/>
 
-
+<!--
 <node pkg="exploration_ros" name="slam" type="slam_node" output="screen" args="-timeUpdate 0 -angularUpdate 0.5 -linearUpdate 0.5 -scanTopic scan -type 0" />
+-->
+
+<node pkg="cg_mrslam" name="slam" type="cg_mrslam" output="screen" args="-publishMap 1 - modality real" />
 
 
 <!--

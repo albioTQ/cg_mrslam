@@ -18,26 +18,9 @@ Requirements:
         $ git clone https://github.com/ros-planning/navigation.git
 
 
-#### Optional Requirements
-The following requirements are needed only if you want to run the **mapper_node** or the **slam_node**  included in the package. 
-
-- This code uses the **g2o** framework for graph optimization  
-  
-        $ git clone https://github.com/RainerKuemmerle/g2o.git
-
-  - Set up the following **g2o** environment variables in your ~/.bashrc:  
-
-            #set up G2O
-            export G2O_ROOT=path_to_your_g2o_installation  
-            export G2O_BIN=${G2O_ROOT}/bin  
-            export G2O_LIB=${G2O_ROOT}/lib  
-            export LD_LIBRARY_PATH=${G2O_LIB}:${LD_LIBRARY_PATH}  
-            export PATH=${G2O_BIN}:${PATH}  
-
 - This code uses **cg_mrslam** developed by M.T. Lazaro for implementing SLAM techniques 
 
         $ git clone https://github.com/mtlazaro/cg_mrslam.git
-
 
 
 - To run the simulation example it's necessary **ROS Stage**
@@ -55,18 +38,12 @@ The code has been tested on Ubuntu 14.04 and 16.04 (64bits).
   - Installation for ROS is supported
   - In your catkin workspace 
 
-            $ catkin_make -DCMAKE_BUILD_TYPE=Release
+            $ catkin_make 
 
 Instructions
 ------------
 
 #### Nodes
-
-- **mapper_node:**
-This node simply collects odom and laser messages in order to build a map, without any postprocessing.
-
-- **slam_node:**
-This node consists of the slam node developed by M.T. Lazaro with the addition of the creation and management of an occupancy map developed in the mapper_node.
 
 - **frontier_planner:**
  This node, given an occupancy map and a pose of the robot, generates and send goals to the move_base action client.
@@ -85,5 +62,4 @@ It's possible to test the whole system by using a launch file present in the pac
 
 The frontier planner node can be used also with different SLAM nodes, in particular it has been already tested with gmapping. The only requirements are the availability of an occupancy grid map and of a map -> robot TF transform.
 
-Similarly someone could use just the SLAM node: it requires the availability of laser scan and odometry measures.
 

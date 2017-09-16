@@ -117,12 +117,6 @@ goalPlanner.setUnknownCellsCloud(unknownCellsCloud);
 goalPlanner.setOccupiedCellsCloud(occupiedCellsCloud);
 
 
-/*if (ros::ok()){
-
-
-}
-*/
-
  
 while (ros::ok() && (numExplorationIterations != 0)){
 

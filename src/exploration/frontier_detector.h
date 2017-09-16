@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <stdlib.h> 
 #include <algorithm>
-
+#include <stack>
 #include "tf/transform_listener.h"
 
 #include "ros/ros.h"
