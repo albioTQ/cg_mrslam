@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <stdlib.h> 

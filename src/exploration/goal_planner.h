@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <math.h> 
@@ -23,7 +25,6 @@
 #include "projector2d.h"
 #include "exploration/fake_projector.h"
 
-#include "g2o/types/slam2d/se2.h"
 #include "frontier_detector.h"
 #include "paths_rollout.h"
 #include "srrg_types/defs.h"
@@ -35,8 +36,8 @@ class GoalPlanner {
 
 public:
 
-	  void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
-	  void velCallback(const geometry_msgs::Twist::ConstPtr& msg);
+	void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
+	void velCallback(const geometry_msgs::Twist::ConstPtr& msg);
 
 
 	GoalPlanner(MoveBaseClient *ac, FakeProjector *projector, FrontierDetector *frontierDetector, cv::Mat *costImage, Vector2f laserOffset = {0.0, 0.5}, int minThresholdSize = 10, std::string mapFrame = "map", std::string baseFrame = "base_link", std::string laserTopicName = "base_scan");

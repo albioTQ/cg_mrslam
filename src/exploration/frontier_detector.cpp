@@ -220,11 +220,12 @@ void FrontierDetector::computeFrontierPoints(int startRow, int startCol, int end
 
 	_frontiers.clear();
 	_occupiedCellsCloud.clear();
-		
+
+
     for(int r = startRow; r < endRow; r++) {
 		for(int c = startCol; c < endCol; c++) {
     	
-    		if ((_occupancyMap->at<unsigned char>(r,c) == _freeColor)){ //If the current cell is free consider it
+    		if (_occupancyMap->at<unsigned char>(r,c) == _freeColor){ //If the current cell is free consider it
     			Vector2i coord = {r,c};
     			if (_costMap->at<unsigned char>(r, c) == _circumscribedThreshold){//If the current free cell is too close to an obstacle skip
     				continue;
@@ -258,64 +259,58 @@ void FrontierDetector::computeFrontierRegions(){
 	_regions.clear();
 	_unknownCellsCloud.clear();
 
-	Vector2iVector examined;
-
 	Vector2iVector availablePoints = _frontiers;
 
-	for (unsigned i = 0; i < availablePoints.size(); i ++){
 
-		Vector2i currentFrontierPoint = availablePoints[i];
+	while (!availablePoints.empty()){
 
-		std::stack<Vector2i> pointsStack;
+		Vector2i initialPoint = *availablePoints.begin();
 
 		Vector2iVector tempRegion;
 
-		tempRegion.push_back(currentFrontierPoint);
-		pointsStack.push(currentFrontierPoint);
+		std::stack<Vector2i> stack;
 
-		while (!pointsStack.empty()) {
+		tempRegion.push_back(initialPoint);
+		stack.push(initialPoint);
 
-			Vector2i pt = pointsStack.top();
-			pointsStack.pop();
+		while (! stack.empty()){
 
-			Vector2iVector neighbors;
-	    	neighbors.push_back({pt[0] + 1, pt[1]});
-	    	neighbors.push_back({pt[0] - 1, pt[1]});
-	    	neighbors.push_back({pt[0], pt[1] + 1});
-	    	neighbors.push_back({pt[0], pt[1] - 1});
-	    	neighbors.push_back({pt[0] + 1, pt[1] + 1});
-	    	neighbors.push_back({pt[0] + 1, pt[1] - 1});
-	    	neighbors.push_back({pt[0] - 1, pt[1] + 1});
-	    	neighbors.push_back({pt[0] - 1, pt[1] - 1});
+			Vector2i currentPoint = stack.top();
+			stack.pop();
 
-	    	for (unsigned j = 0; j < neighbors.size(); j++){
+			for (unsigned k = 0; k < availablePoints.size(); k ++){
 
-	    		Vector2iVector::iterator it = std::find(availablePoints.begin(), availablePoints.end(), neighbors[j]);
+				Vector2i candidate = availablePoints[k];
 
-	    		if (it != availablePoints.end()){
-	    			availablePoints.erase(it);
-	    			pointsStack.push(neighbors[j]);
-	    			tempRegion.push_back(neighbors[j]);
-	    		}
+				int diffX = std::abs(currentPoint[0] - candidate[0]);
+				int diffY = std::abs(currentPoint[1] - candidate[1]);
 
-	    	}
+				if (diffX <= 1 && diffY <=1){
+					
+					availablePoints[k] = availablePoints.back();
+  					availablePoints.pop_back();
+  					stack.push(candidate);
+  					tempRegion.push_back(candidate);
+					
+				}
+
+
+			}
 
 
 		}
+
 
 		if (tempRegion.size() > _sizeThreshold){
 			_regions.push_back(tempRegion);
 
 
 		   for (int l = 0; l < tempRegion.size(); l ++){
-		   		Vector2iVector neighbors = getColoredNeighbors(tempRegion[l], _unknownColor);
-		   		for (int m = 0; m < neighbors.size(); m++){
-		   				float x = neighbors[m][1]*_mapMetaData.resolution + _mapMetaData.origin.position.x;
-		   				float y = neighbors[m][0]*_mapMetaData.resolution + _mapMetaData.origin.position.y;
-		   				if (!contains(_unknownCellsCloud, Vector2f{x,y})){
-		   					_unknownCellsCloud.push_back({x,y});	}
-		   									
-		   									}
+   				float x = tempRegion[l][1]*_mapMetaData.resolution + _mapMetaData.origin.position.x;
+   				float y = tempRegion[l][0]*_mapMetaData.resolution + _mapMetaData.origin.position.y;
+   				if (!contains(_unknownCellsCloud, Vector2f{x,y})){
+   					_unknownCellsCloud.push_back({x,y});	}
+
 		   								}
 
 			
@@ -325,58 +320,6 @@ void FrontierDetector::computeFrontierRegions(){
 	}
 
 
-
-/*
-    for (int i = 0; i < _frontiers.size(); i++){
-
-    	if (!contains(examined, _frontiers[i])){ //I proceed only if the current coord has not been already considered
-
-    		Vector2iVector tempRegion;
-    		tempRegion.push_back(_frontiers[i]);
-    		examined.push_back(_frontiers[i]);
-
-    		for (int k = 0; k < tempRegion.size(); k ++){
-
-	    		Vector2iVector neighbor;
-	    		neighbor.push_back({tempRegion[k][0] + 1, tempRegion[k][1]});
-	    		neighbor.push_back({tempRegion[k][0] - 1, tempRegion[k][1]});
-	    		neighbor.push_back({tempRegion[k][0], tempRegion[k][1] + 1});
-	    		neighbor.push_back({tempRegion[k][0], tempRegion[k][1] - 1});
-	    		neighbor.push_back({tempRegion[k][0] + 1, tempRegion[k][1] + 1});
-	    		neighbor.push_back({tempRegion[k][0] + 1, tempRegion[k][1] - 1});
-	    		neighbor.push_back({tempRegion[k][0] - 1, tempRegion[k][1] + 1});
-	    		neighbor.push_back({tempRegion[k][0] - 1, tempRegion[k][1] - 1});
-
-	    		for (int j = 0; j < neighbor.size(); j ++){
-
-	    			if ((contains(_frontiers, neighbor[j]))&&(!contains(examined, neighbor[j]))) {
-	    				examined.push_back(neighbor[j]);
-	    				tempRegion.push_back(neighbor[j]);
-	    										}
-	    								}
-							}
-			if (tempRegion.size() >= _sizeThreshold){
-			   	_regions.push_back(tempRegion);
-
-			   for (int l = 0; l < tempRegion.size(); l ++){
-			   		Vector2iVector neighbors = getColoredNeighbors(tempRegion[l], _unknownColor);
-			   		for (int m = 0; m < neighbors.size(); m++){
-			   				float x = neighbors[m][1]*_mapMetaData.resolution + _mapMetaData.origin.position.x;
-			   				float y = neighbors[m][0]*_mapMetaData.resolution + _mapMetaData.origin.position.y;
-			   				if (!contains(_unknownCellsCloud, Vector2f{x,y})){
-			   					_unknownCellsCloud.push_back({x,y});	}
-			   									
-			   									}
-			   								}
-										}
-
-							
-							}
-
-    			}
-
-
-*/
 
 }
 	

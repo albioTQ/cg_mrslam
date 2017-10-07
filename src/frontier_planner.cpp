@@ -1,8 +1,6 @@
 
 #include <unistd.h>
 
-#include "g2o/stuff/command_args.h"
-
 #include "ros/ros.h"
 #include "geometry_msgs/Pose2D.h"
 #include "tf/transform_listener.h"
@@ -23,7 +21,6 @@ double timeval_diff(struct timeval *a, struct timeval *b)
 
 int main (int argc, char **argv){
 
-g2o::CommandArgs arg;
 
 std::string frontierPointsTopic, markersTopic;
 
@@ -31,11 +28,11 @@ int thresholdRegionSize;
 int thresholdExploredArea;
 nav_msgs::MapMetaData occupancyMapInfo;
 
-float lambdaDecay;
+double lambdaDecay;
 
 int maxCentroidsNumber;
-float farCentroidsThreshold;
-float nearCentroidsThreshold;
+double farCentroidsThreshold;
+double nearCentroidsThreshold;
 int numExplorationIterations;
 
 Vector2iVector centroids;
@@ -52,25 +49,25 @@ cv::Mat occupancyMap, costMap;
 
 Vector2f laserOffset;
 
-arg.param("mapFrame", mapFrame, "map", "TF mapFrame for the robot");
-arg.param("baseFrame", baseFrame, "base_link", "TF base Frame for the robot");
-arg.param("laserFrame", laserFrame, "base_laser_link", "TF laser Frame for the robot");
-arg.param("scanTopic", laserTopicName,"scan", "laser scan ROS topic");
-arg.param("pointsTopic", frontierPointsTopic, "points", "frontier points ROS topic");
-arg.param("markersTopic", markersTopic, "markers", "frontier centroids ROS topic");
-arg.param("regionSize", thresholdRegionSize, 15, "minimum size of a frontier region");
-arg.param("exploredArea", thresholdExploredArea, 10, "minimum number of visible frontier points before aborting a goal");
-arg.param("lambda", lambdaDecay, 1.25, "distance decay factor for choosing next goal");
-arg.param("mc", nearCentroidsThreshold, 0.5, "Lower distance limit to consider 2 goals as the same, in meters");
-arg.param("Mc", farCentroidsThreshold, 5.0, "Max distance at which a centroid is considered if there are also closer ones, in meters");
-arg.param("nc", maxCentroidsNumber, 8, "Maximum number of centroids considered during each search for a goal");
-arg.param("iter", numExplorationIterations, 10, "Number of plans to be computed. -1 means infinite");
-
-arg.parseArgs(argc, argv);
-
 ros::init(argc, argv, "frontier_planner");
 
-ros::NodeHandle nh;
+ros::NodeHandle nh("~");
+
+nh.param("mapFrame", mapFrame, std::string("map"));
+nh.param("baseFrame", baseFrame, std::string("base_link"));
+nh.param("laserFrame", laserFrame, std::string("base_laser_link"));
+nh.param("scanTopic", laserTopicName, std::string("scan"));
+nh.param("pointsTopic", frontierPointsTopic, std::string("points"));
+nh.param("markersTopic", markersTopic, std::string("markers"));
+nh.param("regionSize", thresholdRegionSize, 15);
+nh.param("exploredArea", thresholdExploredArea, 10);
+nh.param("lambda", lambdaDecay, 1.25);
+nh.param("mc", nearCentroidsThreshold, 0.5);
+nh.param("Mc", farCentroidsThreshold, 5.0);
+nh.param("nc", maxCentroidsNumber, 8);
+nh.param("iter", numExplorationIterations, -1);
+
+
 
 //Laserscan FAKE projection parameters
 float minRange = 0.0;
@@ -117,6 +114,8 @@ goalPlanner.setUnknownCellsCloud(unknownCellsCloud);
 goalPlanner.setOccupiedCellsCloud(occupiedCellsCloud);
 
 
+std::cout<<"EXPLORATION: "<<std::endl;
+std::cout<<"ITERATIONS: "<< numExplorationIterations<<std::endl;
  
 while (ros::ok() && (numExplorationIterations != 0)){
 

@@ -4,18 +4,35 @@
 
 <remap from="scan" to="base_scan"/>
 
-<!--
-<node pkg="exploration_ros" name="slam" type="slam_node" output="screen" args="-timeUpdate 0 -angularUpdate 0.5 -linearUpdate 0.5 -scanTopic scan -type 0" />
--->
 
-<node pkg="cg_mrslam" name="slam" type="cg_mrslam" output="screen" args="-publishMap 1 - modality real" />
+<node pkg="cg_mrslam" name="slam" type="cg_mrslam" output="screen" 
+args="-modality real -publishMap 1" />
 
 
 <!--
 <include file="$(find exploration_ros)/move_base_config/slam_gmapping.xml"/>
 -->
 
-<node pkg="exploration_ros" name="planner" type="frontier_planner" output="screen" args="-iter -1"  />
+<node 
+pkg="exploration_ros" name="planner" type="frontier_planner" output="screen" args="-iter -1" >
+
+<param name="mapFrame" value="map" /> <!--  doc="TF mapFrame for the robot" --> 
+<param name="baseFrame" value="base_link" />  <!-- doc="TF base Frame for the robot" -->
+<param name="laserFrame" value="base_laser_link" /> <!-- doc="TF laser Frame for the robot" -->
+<param name="scanTopic" value="scan" /> <!--  doc="laser scan ROS topic" -->
+<param name="pointsTopic" value="points" /> <!-- doc="frontier points ROS topic" -->
+<param name="markersTopic" value="markers" /> <!-- doc="frontier centroids ROS topic" -->
+<param name="regionSize" value="15" /> <!-- doc="minimum size of a frontier region" -->
+<param name="exploredArea" value="10" /> <!-- doc="minimum number of visible frontier points before aborting a goal" -->
+<param name="lambda" value="1.25" /> <!-- doc="distance decay factor for choosing next goal" -->
+<param name="mc" value="0.5" /> <!-- doc="Lower distance limit to consider 2 goals as the same, in meters" -->
+<param name="Mc" value="5.0" /> <!-- doc="Max distance at which a centroid is considered if there are also closer ones, in meters"  -->
+<param name="nc" value="10" /> <!-- doc="Maximum number of centroids considered during each search for a goal" -->
+<param name="iter" value="-1" /> <!-- doc="Number of plans to be computed. -1 means infinite" -->
+
+
+</node> 
+
 
 
 <node pkg="stage_ros" type="stageros" name="stageros" args="$(find exploration_ros)/stagefiles/hospital.world" respawn="false" >

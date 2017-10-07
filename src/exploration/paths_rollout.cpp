@@ -192,7 +192,7 @@ std::vector<PoseWithInfo> PathsRollout::sampleTrajectory(nav_msgs::Path path){
 		PoseWithInfo lastPose;
 		//This is the starting pose
 		double initialAngle = tf::getYaw(_tfMapToBase.getRotation());
-		lastPose.pose = {_tfMapToBase.getOrigin().x(), _tfMapToBase.getOrigin().y(), initialAngle};
+		lastPose.pose = {float(_tfMapToBase.getOrigin().x()), float(_tfMapToBase.getOrigin().y()), float(initialAngle)};
 		lastPose.predictedAngle = initialAngle;
 		lastPose.index = 0;
 		lastPose.planLenght = path.poses.size() - 1;
@@ -216,7 +216,7 @@ std::vector<PoseWithInfo> PathsRollout::sampleTrajectory(nav_msgs::Path path){
 			PoseWithInfo newPose;
 
 			//NOTE: The orientation of this pose will be eventually computed if the pose will be sampled
-			newPose.pose = {path.poses[i].pose.position.x, path.poses[i].pose.position.y, 0.0};
+			newPose.pose = {float(path.poses[i].pose.position.x), float(path.poses[i].pose.position.y), 0.0};
 			Vector2i newPoseMap = {round((newPose.pose[1] - _mapMetaData.origin.position.y)/_mapMetaData.resolution), round((newPose.pose[0] - _mapMetaData.origin.position.x)/_mapMetaData.resolution)};
 			float distancePreviousPose = sqrt(pow((lastPose.pose[0] - newPose.pose[0]),2) + pow((lastPose.pose[1] - newPose.pose[1]),2));
 			//If the pose I'm considering is quite far from the lastPose sampled and it's not too close to an obstacle I proceed
@@ -251,7 +251,7 @@ std::vector<PoseWithInfo> PathsRollout::sampleTrajectory(nav_msgs::Path path){
 
 
 		PoseWithInfo newPose;	
-		newPose.pose = {path.poses.back().pose.position.x, path.poses.back().pose.position.y, 0.0};
+		newPose.pose = {float(path.poses.back().pose.position.x), float(path.poses.back().pose.position.y), 0.0};
 
 		float distancePreviousPose = sqrt(pow((lastPose.pose[0] - newPose.pose[0]),2) + pow((lastPose.pose[1] - newPose.pose[1]),2));
 
